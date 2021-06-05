@@ -1,0 +1,9 @@
+Pandawa\ChunkUpload\Upload\UploadManager:
+    class: Pandawa\ChunkUpload\Upload\UploadManager
+    arguments:
+        - '%chunk_upload.upload_handler%'
+        - '#UploadHandler'
+
+Pandawa\ChunkUpload\Upload\Handler\ResumableJsUploadHandler:
+    class: Pandawa\ChunkUpload\Upload\Handler\ResumableJsUploadHandler
+    tag: UploadHandler

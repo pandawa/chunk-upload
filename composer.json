@@ -1,0 +1,63 @@
+{
+    "name": "pandawa/chunk-upload",
+    "type": "library",
+    "description": "Pandawa SDK for chunk upload",
+    "keywords": [
+        "pandawa",
+        "chunk upload"
+    ],
+    "homepage": "http://github.com/pandawa/chunk-upload",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Iqbal Maulana",
+            "email": "iq.bluejack@gmail.com"
+        },
+        {
+            "name": "Aldi Arief",
+            "email": "aldiarief598@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "aliyuncs/oss-sdk-php": "dev-master as 2.4.1",
+        "apollopy/flysystem-aliyun-oss": "^1.2",
+        "pandawa/pandawa": "^4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.18",
+        "phpstan/extension-installer": "^1.0",
+        "phpstan/phpstan": "^0.12"
+    },
+    "autoload": {
+        "files": [],
+        "psr-4": {
+            "Pandawa\\ChunkUpload\\": "src/"
+        }
+    },
+    "scripts": {
+        "phpcs": [
+            "vendor/bin/php-cs-fixer fix --verbose --diff --dry-run"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyse"
+        ],
+        "psalm": [
+            "vendor/bin/psalm"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Pandawa\\ChunkUpload\\PandawaChunkUploadModule"
+            ]
+        }
+    }
+}

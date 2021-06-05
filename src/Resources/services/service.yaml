@@ -1,0 +1,6 @@
+Pandawa\ChunkUpload\Upload\Service\FileUploader:
+    class: Pandawa\ChunkUpload\Upload\Service\FileUploader
+    arguments:
+        - '@Pandawa\ChunkUpload\Upload\UploadManager'
+        - '@Pandawa\ChunkUpload\Upload\Contract\FileRepository'
+        - '@filesystem'
