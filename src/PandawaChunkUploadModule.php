@@ -16,14 +16,25 @@ class PandawaChunkUploadModule extends AbstractModule
 {
     protected function build(): void
     {
-        foreach (['oss.public', 'oss.private'] as $driver) {
-            if (config('filesystems.disk.' . $driver)) {
-                Storage::extend($driver, function ($app, $config) {
-                    $factory = new ChunkStorageFactory($app, new AliyunOssFactory(), config('chunk_upload.plugins'));
+        Storage::extend('oss', function ($app, $config) {
+            $factory = new ChunkStorageFactory(
+                $app,
+                new AliyunOssFactory(),
+                config('chunk_upload.plugins')
+            );
 
-                    return $factory->create($config);
-                });
-            }
+            return $factory->create($config);
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/chunk_upload.php' => config_path('chunk_upload.php'),
+            ], 'config');
         }
+    }
+
+    protected function init(): void
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/chunk_upload.php', 'chunk_upload');
     }
 }

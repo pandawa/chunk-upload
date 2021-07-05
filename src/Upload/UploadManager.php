@@ -30,6 +30,10 @@ final class UploadManager
     public function __construct(string $defaultHandler, $handlers)
     {
         $this->defaultHandler = $defaultHandler;
+
+        foreach ($handlers as $handler) {
+            $this->add($handler);
+        }
     }
 
     public function add(UploadHandler $handler): void
@@ -48,7 +52,7 @@ final class UploadManager
         return $this->handlers[$handler];
     }
 
-    public function __call($method, ...$arguments)
+    public function __call($method, $arguments)
     {
         return $this->handler()->{$method}(...$arguments);
     }

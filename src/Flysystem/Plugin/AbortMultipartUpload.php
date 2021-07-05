@@ -17,7 +17,7 @@ class AbortMultipartUpload extends AbstractPlugin
 
     public function getMethod(): string
     {
-        return 'initiateMultipartUpload';
+        return 'abortMultipartUpload';
     }
 
     public function handle(string $uploadId, string $path, array $config = [])
