@@ -10,6 +10,7 @@ use Pandawa\Bundle\FoundationBundle\Plugin\ImportConfigurationPlugin;
 use Pandawa\ChunkUpload\Filesystem\ChunkStorageMacroFactoryInterface;
 use Pandawa\Component\Foundation\Bundle\Bundle;
 use Pandawa\Contracts\Foundation\HasPluginInterface;
+use Exception;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
@@ -29,13 +30,15 @@ class ChunkUploadBundle extends Bundle implements HasPluginInterface
         $factories = $this->getConfig('storage_factories');
 
         foreach ($factories as $disk => $factoryClass) {
-            /** @var ChunkStorageMacroFactoryInterface $factory */
-            $factory = $this->app->make($factoryClass);
+            try {
+                /** @var ChunkStorageMacroFactoryInterface $factory */
+                $factory = $this->app->make($factoryClass);
 
-            Storage::disk($disk)->macro('uploadPart', $factory->uploadPart());
-            Storage::disk($disk)->macro('abortMultipartUpload', $factory->abortMultipartUpload());
-            Storage::disk($disk)->macro('completeMultipartUpload', $factory->completeMultipartUpload());
-            Storage::disk($disk)->macro('initiateMultipartUpload', $factory->initiateMultipartUpload());
+                Storage::disk($disk)->macro('uploadPart', $factory->uploadPart());
+                Storage::disk($disk)->macro('abortMultipartUpload', $factory->abortMultipartUpload());
+                Storage::disk($disk)->macro('completeMultipartUpload', $factory->completeMultipartUpload());
+                Storage::disk($disk)->macro('initiateMultipartUpload', $factory->initiateMultipartUpload());
+            } catch (Exception) {}
         }
     }
 }
