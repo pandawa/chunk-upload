@@ -26,7 +26,7 @@ class ChunkUploadBundle extends Bundle implements HasPluginInterface
 
     public function boot(): void
     {
-        $factories = $this->getConfig('chunk_upload.storage_factories');
+        $factories = $this->getConfig('storage_factories');
 
         foreach ($factories as $disk => $factoryClass) {
             /** @var ChunkStorageMacroFactoryInterface $factory */
