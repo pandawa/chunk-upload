@@ -55,7 +55,7 @@
         },
         "laravel": {
             "providers": [
-                "ChunkUploadBundle"
+                "Pandawa\\ChunkUpload\\ChunkUploadBundle"
             ]
         }
     },
