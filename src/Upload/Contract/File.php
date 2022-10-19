@@ -14,4 +14,6 @@ interface File
     public function getReference(): string;
 
     public function getPath(): string;
+
+    public function getDriver(): string;
 }

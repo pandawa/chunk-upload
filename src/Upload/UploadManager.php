@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace Pandawa\ChunkUpload\Upload;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Pandawa\ChunkUpload\Upload\Contract\ChunkUploadPayload;
+use Pandawa\ChunkUpload\Upload\Exception\UploadFileException;
 use RuntimeException;
 
 /**
- * @method string getIdentifier(Request $request)
- * @method int getPart(Request $request)
- * @method int getTotalChunks(Request $request)
- * @method int getChunkSize(Request $request)
- * @method int getTotalSize(Request $request)
- * @method string getFileName(Request $request)
- * @method bool isValidRequest(Request $request)
+ * @mixin UploadHandler
  *
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
@@ -50,6 +47,25 @@ final class UploadManager
         }
 
         return $this->handlers[$handler];
+    }
+
+    public function validateAndExtractRequest(Request $request): ChunkUploadPayload
+    {
+        $this->validateRequest($request);
+
+        return $this->extractRequest($request);
+    }
+
+    public function validateRequest(Request $request): void
+    {
+        if (!$this->isValidRequest($request)) {
+            throw new UploadFileException('Invalid chunk upload request.', 400);
+        }
+    }
+
+    public function extractRequest(Request $request): ChunkUploadPayload
+    {
+        return $this->getPayload($request);
     }
 
     public function __call($method, $arguments)

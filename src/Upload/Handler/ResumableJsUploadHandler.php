@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pandawa\ChunkUpload\Upload\Handler;
 
 use Illuminate\Http\Request;
+use Pandawa\ChunkUpload\Upload\Contract\ChunkUploadPayload;
 use Pandawa\ChunkUpload\Upload\UploadHandler;
 
 /**
@@ -47,6 +48,18 @@ final class ResumableJsUploadHandler implements UploadHandler
         return (int)$request->input('resumableTotalSize');
     }
 
+    public function getPayload(Request $request): ChunkUploadPayload
+    {
+        return new ChunkUploadPayload(
+            identifier: $this->getIdentifier($request),
+            part: $this->getPart($request),
+            totalChunks: $this->getTotalChunks($request),
+            fileName: $this->getFileName($request),
+            chunkSize: $this->getChunkSize($request),
+            totalSize: $this->getTotalSize($request)
+        );
+    }
+
     public function isValidRequest(Request $request): bool
     {
         $requiredFields = [
@@ -60,7 +73,7 @@ final class ResumableJsUploadHandler implements UploadHandler
         $payload = $request->input();
 
         foreach ($requiredFields as $requiredField) {
-            if (null === $payload[$requiredField] ?? null) {
+            if (null === ($payload[$requiredField] ?? null)) {
                 return false;
             }
         }

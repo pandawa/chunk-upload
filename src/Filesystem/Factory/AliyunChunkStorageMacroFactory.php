@@ -8,10 +8,10 @@ use AlphaSnow\Flysystem\Aliyun\AliyunException;
 use AlphaSnow\LaravelFilesystem\Aliyun\OssClientAdapter;
 use Closure;
 use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Http\UploadedFile;
 use OSS\Core\OssException;
 use OSS\OssClient;
 use Pandawa\ChunkUpload\Filesystem\ChunkStorageMacroFactoryInterface;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @author  Aldi Arief <aldiarief598@gmail.com>
@@ -20,7 +20,7 @@ final class AliyunChunkStorageMacroFactory implements ChunkStorageMacroFactoryIn
 {
     public function uploadPart(): Closure
     {
-        return function (string $uploadId, string $path, int $partNumber, UploadedFile $file, array $options = []) {
+        return function (string $uploadId, string $path, int $partNumber, File $file, array $options = []) {
             /**
              * @var FilesystemAdapter $this
              */
