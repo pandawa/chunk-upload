@@ -6,73 +6,71 @@ namespace Pandawa\ChunkUpload\Upload\Service;
 
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Pandawa\ChunkUpload\Upload\Contract\File;
+use Pandawa\ChunkUpload\Upload\Contract\Chunked;
+use Pandawa\ChunkUpload\Upload\Contract\ChunkUploadPayload;
+use Pandawa\ChunkUpload\Upload\Contract\File as FileContract;
 use Pandawa\ChunkUpload\Upload\Contract\FileRepository;
-use Pandawa\ChunkUpload\Upload\DTO\Chunked;
 use Pandawa\ChunkUpload\Upload\Exception\UploadFileException;
 use Pandawa\ChunkUpload\Upload\UploadManager;
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @author  Iqbal Maulana <iq.bluejack@gmail.com>
  */
 final class FileUploader
 {
-    private UploadManager $uploadManager;
-    private FileRepository $fileRepository;
-    private FilesystemManager $storage;
+    public function __construct(
+        private readonly UploadManager $uploadManager,
+        private readonly FileRepository $fileRepository,
+        private readonly FilesystemManager $storage
+    ) {}
 
-    public function __construct(UploadManager $uploadManager, FileRepository $fileRepository, FilesystemManager $storage)
+    public function uploadFromRequest(Request $request, ?UploadedFile $chunk): Chunked
     {
-        $this->uploadManager = $uploadManager;
-        $this->fileRepository = $fileRepository;
-        $this->storage = $storage;
-    }
-
-    public function upload(string $driver, Request $request, ?UploadedFile $uploadedFile): Chunked
-    {
-        $this->validate($request, $uploadedFile);
-
-        $fileIdentifier = $this->uploadManager->getIdentifier($request);
-        $file = $this->findFile($fileIdentifier);
-        $chunkPart = $this->uploadManager->getPart($request);
+        $chunkUploadPayload = $this->uploadManager->validateAndExtractRequest($request);
+        $file = $this->findFile($chunkUploadPayload->identifier);
 
         if ($request->isMethod('GET')) {
-            return new Chunked($file, $chunkPart);
+            return new Chunked($file, $chunkUploadPayload->part);
         }
+
+        if ($request->isMethod('POST') && null === $chunk) {
+            throw new UploadFileException('Missing file.', 400);
+        }
+
+        return $this->upload(
+            $file,
+            $chunkUploadPayload,
+            $chunk
+        );
+    }
+
+    public function upload(FileContract $file, ChunkUploadPayload $payload, ?File $chunk): Chunked
+    {
+        $chunkPart = $payload->part;
 
         return new Chunked(
             $file,
             $chunkPart,
-            $this->storage->drive($driver)->uploadPart(
+            $this->storage->drive($file->getDriver())->uploadPart(
                 $file->getReference(),
                 $file->getPath(),
                 $chunkPart,
-                $uploadedFile
+                $chunk
             ),
-            $this->uploadManager->getTotalChunks($request),
+            $payload->totalChunks,
             true
         );
     }
 
-    private function validate(Request $request, ?UploadedFile $uploadedFile): void
+    public function findFile(string $identifier): FileContract
     {
-        if ($request->isMethod('POST') && null === $uploadedFile) {
-            throw new UploadFileException('Missing file.', 400);
-        }
-
-        if (!$this->uploadManager->isValidRequest($request)) {
-            throw new UploadFileException('Invalid chunk upload request.', 400);
-        }
-    }
-
-    private function findFile(string $fileIdentifier): File
-    {
-        if (null !== $file = $this->fileRepository->findByIdentifier($fileIdentifier)) {
+        if (null !== $file = $this->fileRepository->findByIdentifier($identifier)) {
             return $file;
         }
 
-        throw new UploadException(sprintf('File with identifier "%s" is not found.', $fileIdentifier), 404);
+        throw new UploadException(sprintf('File with identifier "%s" is not found.', $identifier), 404);
     }
 }
